@@ -1,0 +1,173 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Lexical analyer by netcan</title>
+		<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+		<link href="../node_modules/semantic-ui-css/semantic.min.css" rel="stylesheet">
+		<style>
+			.outmaxh {
+				display: block;
+				max-height: 550px;
+				height: 550px;
+				overflow-y: auto;
+			}
+			.tokenmaxh {
+				display: inline-block;
+				max-height: 300px;
+				height: 300px;
+				overflow-y: auto;
+				direction: rtl;
+
+			}
+			hr {
+				visibility:hidden;
+		   		margin-top: -7px;
+			}
+
+			/* Let's get this party started */
+			::-webkit-scrollbar {
+				width: 8px;
+			}
+
+			/* Track */
+			::-webkit-scrollbar-track {
+				-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+				-webkit-border-radius: 4px;
+				border-radius: 4px;
+			}
+
+			/* Handle */
+			::-webkit-scrollbar-thumb {
+				-webkit-border-radius: 4px;
+				border-radius: 4px;
+				background: rgba(239,239,239,0.8);
+				-webkit-box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
+			}
+			::-webkit-scrollbar-thumb:window-inactive {
+				background: rgba(239,239,239,0.8);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="ui container">
+			<h1 class="header">Lexical analyer by netcan</h1>
+
+			<div class="ui two column doubling stackable grid">
+				<div class="column">
+					<div class="ui segment">
+						<div class="ui form">
+							<div class="field">
+								<label for="indata">输入文本</label>
+								<textarea id="indata" name="indata"></textarea>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="column">
+							<div class="ui piled segment">
+								<h3 class="ui horizontal divider header">
+									<i class="tiny code icon"></i>记号块
+								</h3>
+								<div class="tokenmaxh">
+									<div id="token" style="direction: ltr;">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="column">
+					<div class="ui piled segment">
+						<h3 class="ui horizontal divider header">
+							<i class="tiny hashtag icon"></i>
+							Lexical analyer output
+						</h3>
+						<div class="outmaxh">
+							<table class="ui fixed compact stackable striped selectable celled table">
+								<thead>
+									<tr>
+										<th class="two wide">#</th>
+										<th>Word</th>
+										<th>Tuple</th>
+										<th>Type</th>
+										<th>Position</th>
+									</tr>
+								</thead>
+								<tbody id="out">
+
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+			<!-- <button class="btn btn-info" id="submit">提交</button> -->
+			<a href="https://github.com/netcan/compilingTheory" target="_blank">
+				<img style="position: fixed; top: 0; right: 0; border: 0; z-index: 901" src="../fork.png" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
+			</a>
+		</div>
+
+		<script src="../node_modules/semantic-ui-css/semantic.min.js"></script>
+		<script>
+			function update() {
+				var color = [
+					'red',
+					'blue',
+					'grey',
+					'purple',
+					'violet',
+					'pink',
+					'teal',
+					'orange',
+					'orange',
+					'brown'
+				];
+				$.ajax({
+					url: "lexical.php",
+					dataType: "json",
+					method: "POST",
+					data: {indata: $('#indata').val()},
+					success: function(data, status, jqxhr) {
+						var first = 0;
+						var lastrow = 0;
+						var token = '';
+						var out = '';
+						for(var i=0, len=data.length; i!=len; ++i) {
+							var entry = data[i];
+							if(lastrow != entry['pos'][0])
+								token += '<hr><a class="tiny ui basic circular label">#' + entry['pos'][0] + '</a>';
+							token +='<a class="tiny ui ' + color[entry['tuple'][0]] + ' label" data-html="'+
+								'<a class=\'ui '+ color[entry['tuple'][0]] +' top attached label\'>Token Info</a><br>' +
+								"Type: " + entry['type'] + "<br>Pointer: " + entry['tuple'][1] + "<br>Postion: (" + entry['pos'][0] + ', ' + entry['pos'][1] + ')'
+								+'">' + entry['word'] + '</a>';
+							out += "<tr class='"+ (entry["type"] == "ERROR"?"negative":"") +"'><td>"+first+"</td><td>"+entry["word"]+
+								"</td><td>("+entry["tuple"][0]+", "+entry["tuple"][1]+")</td><td>"+
+								entry["type"] + "</td><td>(" + entry["pos"][0] + ", " + entry["pos"][1] + ")</td></tr>";
+
+							++first;
+							lastrow = entry['pos'][0];
+						}
+					//	console.log(token);
+					//	console.log(out);
+						$('#token').html(token);
+						$('#out').html(out);
+						$('#token a').popup();
+					}
+				});
+			}
+
+			$('textarea').on('keyup paste', update);
+
+			$('textarea').val(
+					"int a = 2, b = 3;\n" +
+					'"this isn\'t a string\n'+
+					'// this is a comment\n'+
+					'printf("c=%d\\n", (a+b)/2);'
+					);
+			update();
+		</script>
+	</body>
+</html>
