@@ -132,7 +132,7 @@ bool Lexical::isId(const string &str) {
 
 int Lexical::getIDPointer(const string &str) {
 	vector<pair<string, Type> >::iterator it = find(indetifiers.begin(), indetifiers.end(), make_pair(str, ID));
-	if(it != indetifiers.end()) // 找到了
+	if(it != indetifiers.end()) 
 		return it - indetifiers.begin();
 	else {
 		indetifiers.push_back(make_pair(str, ID));
@@ -148,7 +148,7 @@ bool Lexical::isNum(const string &str) {
 
 int Lexical::getNumPointer(const string &str) {
 	vector<pair<string, Type> >::iterator it = find(constants.begin(), constants.end(), make_pair(str, NUMBER));
-	if(it != constants.end()) // 找到了
+	if(it != constants.end())
 		return it - constants.begin();
 	else {
 		constants.push_back(make_pair(str, NUMBER));

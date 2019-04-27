@@ -14,7 +14,8 @@ struct Trie {
 	int loc; // 字符串的位置
 	Trie() {
 		isEnd = false;
-		for(int i=0; i<26; ++i) next[i] = NULL;
+		for(int i=0; i<26; ++i) 
+			next[i] = NULL;
 	}
 };
 

@@ -19,7 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cifa_check.cpp" />
+    <ClCompile Include="Lexical\lexical.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Lexical\lexical.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
