@@ -19,7 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="yufa.cpp" />
+    <ClCompile Include="..\词法分析器\Base.cpp" />
+    <ClCompile Include="..\词法分析器\main.cpp" />
+    <ClCompile Include="..\词法分析器\TableStack.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\词法分析器\Base.h" />
+    <ClInclude Include="..\词法分析器\TableStack.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
