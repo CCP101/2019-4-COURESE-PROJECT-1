@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lexical.cpp">
+    <ClCompile Include="yufa.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
