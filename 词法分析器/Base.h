@@ -13,12 +13,14 @@
 #include <stack>
 using namespace std;
 
+//树形构造
 struct node
 {
 	char left;
 	string right;
 };
 
+//文法分析类构造
 class Base
 {
 protected:

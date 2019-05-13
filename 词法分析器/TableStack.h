@@ -3,6 +3,7 @@
 
 #include"Base.h"
 
+//继承base类，构造分析栈与预测表
 class TableStack :public Base
 {
 protected:
@@ -10,7 +11,9 @@ protected:
 	vector<char> left_any;//剩余输入串
 	int tableMap[100][100];//预测表
 public:
-	TableStack(){ memset(tableMap, -1, sizeof(tableMap)); }
+	TableStack(){ 
+		memset(tableMap, -1, sizeof(tableMap)); 
+	}
 
 	void get_table(); //得到预测表
 	void analyExp(string s); //分析栈的处理

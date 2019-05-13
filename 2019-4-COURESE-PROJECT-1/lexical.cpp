@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <string>
 #include <vector>
-#include<sstream>
+#include <sstream>
 
 using namespace std;
 
@@ -12,15 +12,15 @@ public:
 	void getFileName(ifstream&);
 	void scanFile(ifstream&);
 	void analyzeToken(vector<char>);
-	bool isFunction(string);
+	bool isMain(string);
 	bool isIf(string);
-	bool isElse(string);
-	bool isReturn(string);
+	bool isInt(string);
 	bool isNot(string);
 	bool isOr(string);
 	bool isSemicolon(string);
-	bool isVar(string);
-	bool isWhile(string);
+	bool isPrint(string);
+	bool isChars(string);
+	bool isFloat(string);
 	bool isWhiteSpace(char);
 	bool isSymbol(char);
 	bool isAssignOp(char);
@@ -38,9 +38,12 @@ public:
 	bool isAnd(string);
 	bool isComment(char);
 	bool isString(char);
+	void print();
 
 private:
 	vector<char> token;
+	vector<string> lexical_vector;
+	vector<string> zhonglei;
 };
 
 int main() {
@@ -49,21 +52,17 @@ int main() {
 
 	lexicalAnalyzer.getFileName(myFile);
 	lexicalAnalyzer.scanFile(myFile);
+	lexicalAnalyzer.print();
 	cin.get();
 	cin.get();
 	return 0;
 }
 
-//allows user to enter a file name to open
+
 void LexicalAnalyzer::getFileName(ifstream& myFile) {
 	string fileName;
-
-	/*cout << "Enter file name: ";*/
-
-	//keep prompting until user has typed in a valid file name
 	while (true) {
-		/*cin >> fileName;*/
-		fileName = "C++_course_design.hpp";
+		fileName = "test.cpp";
 		myFile.open(fileName);
 
 		if (!myFile) {
@@ -75,9 +74,6 @@ void LexicalAnalyzer::getFileName(ifstream& myFile) {
 	}
 }
 
-//********************** scanFile **********************************************
-
-  //goes through file line by line to analyze tokens
 void LexicalAnalyzer::scanFile(ifstream& myFile) {
 	string currentToken;
 	string readLine;
@@ -86,26 +82,25 @@ void LexicalAnalyzer::scanFile(ifstream& myFile) {
 	string myString = "";
 	int tempX;
 
-	//continue to go through input file line by line
+	
 	while (getline(myFile, readLine)) {
-		//parse line to get tokens
+		
 		for (int x = 0; x < readLine.length(); x++) {
 			tempX = x;
 			lookahead = readLine[x];
 
-			//add character to vector to keep track of token
+			
 			token.push_back(readLine[x]);
 
-			//analyze token since white space is read
+			
 			if (isWhiteSpace(lookahead)) {
 				token.pop_back();
-				analyzeToken(token);
+				vector<char> temp = token;
+				analyzeToken(temp);
 				token.clear();
 			}
 
-			//analyze token since symbol is read
-			//once a symbol is reached, pop the symbol off the vector because the
-			//previously a token was reached
+			
 			else if (isSymbol(lookahead)) {
 				token.pop_back();
 				analyzeToken(token);
@@ -115,42 +110,48 @@ void LexicalAnalyzer::scanFile(ifstream& myFile) {
 				token.clear();
 			}
 
-			//analyze number to see if it is a integer or a part of a string
-			//make sure it is a INTEGER
+			
 			else if (isdigit(lookahead) && !isalpha(readLine[x - 1])) {
-				//keep getting integer values
+				
 				while (isdigit(readLine[x + 1])) {
 					token.push_back(readLine[x + 1]);
 					x++;
 				}
-				//add integer to string for printing
+				
 				for (int y = 0; y < token.size(); y++) {
 					myNumber += token[y];
 				}
-				//print token
+				
+				vector<string>::iterator it = find(lexical_vector.begin(), lexical_vector.end(), myNumber);
+				if (it != lexical_vector.end()) {}
+				else
+				{
+						lexical_vector.push_back(myNumber);
+						zhonglei.push_back(myNumber);
+				}
+				
 				cout << "TOKEN:NUMBER            " << myNumber << endl;
 				myNumber = "";
 				token.clear();
 			}
 
-			//if a comment is reached (#), exit loop and don't print line
+			
 			else if (isComment(lookahead)) {
 				token.clear();
 				break;
 			}
 
-			//if a " is reached the current token is a string
-			//continue reading in string value
+			
 			else if (isString(lookahead)) {
 				token.pop_back();
 
-				//keep reading until end of string
+				
 				while (readLine[x + 1] != '"') {
 					token.push_back(readLine[x + 1]);
 					x++;
 				}
 
-				//add token (in vector) to string for printing
+				
 				for (int y = 0; y < token.size(); y++) {
 					myString += token[y];
 				}
@@ -161,11 +162,11 @@ void LexicalAnalyzer::scanFile(ifstream& myFile) {
 				token.clear();
 			}
 
-			//check to see if value read in is a RELOP
+			
 			else if (isRelop(lookahead)) {
 				token.pop_back();
 
-				//check next character to see if it's a valid RELOP
+				
 				if (isRelop(readLine[x + 1])) {
 					token.push_back(lookahead);
 					token.push_back(readLine[x + 1]);
@@ -174,7 +175,7 @@ void LexicalAnalyzer::scanFile(ifstream& myFile) {
 					token.clear();
 				}
 
-				//check to see if next character creates an assignment operator
+				
 				else if (isAssignOp(readLine[x + 1])) {
 					token.push_back(lookahead);
 					token.push_back(readLine[x + 1]);
@@ -190,7 +191,7 @@ void LexicalAnalyzer::scanFile(ifstream& myFile) {
 					token.clear();
 				}
 
-				//invalid token
+				
 				else {
 					analyzeToken(token);
 					cout << "TOKEN:ERROR             " << lookahead << endl;
@@ -201,7 +202,6 @@ void LexicalAnalyzer::scanFile(ifstream& myFile) {
 	}
 }
 
-//******************************************************************************
 
 bool LexicalAnalyzer::isAssignOp(char ch) {
 	if (ch == '<' || ch == '-') {
@@ -211,8 +211,6 @@ bool LexicalAnalyzer::isAssignOp(char ch) {
 		return false;
 	}
 }
-
-//returns true if argument is a whitespace
 bool LexicalAnalyzer::isWhiteSpace(char ch) {
 	if (ch == ' ' || ch == '\n' || ch == '\0') {
 		return true;
@@ -222,7 +220,6 @@ bool LexicalAnalyzer::isWhiteSpace(char ch) {
 	}
 }
 
-//returns true if argument is a STRING ("" quotes)
 bool LexicalAnalyzer::isString(char ch) {
 	if (ch == '"') {
 		return true;
@@ -232,7 +229,19 @@ bool LexicalAnalyzer::isString(char ch) {
 	}
 }
 
-//returns true if argument is a symbol
+void LexicalAnalyzer::print()
+{
+	int count = 0;
+	cout << endl << "·ûºÅ±í£º" << endl;
+	vector<string>::iterator temp = lexical_vector.begin();
+	vector<string>::iterator temp1 = zhonglei.begin();
+	for (; temp != lexical_vector.end(), temp1 != zhonglei.end() ; temp++, temp1++)
+	{
+		count++;
+		cout << setw(3) << count << " " << setw(10) << *temp << setw(15) << *temp1 << endl;
+	}
+}
+
 bool LexicalAnalyzer::isSymbol(char ch) {
 	if (ch == '(' || ch == ')' || ch == ',' || ch == '{' || ch == '}' || ch == '+' ||
 		ch == '-' || ch == '*' || ch == '/' || ch == '&' || ch == '!' || ch == '|' || ch == ';') {
@@ -243,7 +252,6 @@ bool LexicalAnalyzer::isSymbol(char ch) {
 	}
 }
 
-//returns true if argument is a character of a RELOP
 bool LexicalAnalyzer::isRelop(char ch) {
 	if (ch == '=' || ch == '!' || ch == '<' || ch == '>') {
 		return true;
@@ -254,7 +262,7 @@ bool LexicalAnalyzer::isRelop(char ch) {
 	}
 }
 
-//returns true if argument is a RELOP
+
 bool LexicalAnalyzer::isRelopString(string currentToken) {
 	if (currentToken == "==" || currentToken == "!=" || currentToken == "<" ||
 		currentToken == ">" || currentToken == "<=" || currentToken == ">=") {
@@ -265,9 +273,9 @@ bool LexicalAnalyzer::isRelopString(string currentToken) {
 	}
 }
 
-//returns true if argument is a FUNCTION keyword
-bool LexicalAnalyzer::isFunction(string currentToken) {
-	if (currentToken == "function") {
+
+bool LexicalAnalyzer::isMain(string currentToken) {
+	if (currentToken == "main") {
 		return true;
 	}
 	else {
@@ -275,7 +283,7 @@ bool LexicalAnalyzer::isFunction(string currentToken) {
 	}
 }
 
-//returns true if argument is a IF keyword
+
 bool LexicalAnalyzer::isIf(string currentToken) {
 	if (currentToken == "if") {
 		return true;
@@ -285,7 +293,7 @@ bool LexicalAnalyzer::isIf(string currentToken) {
 	}
 }
 
-//returns true if argument is a OR symbol
+
 bool LexicalAnalyzer::isOr(string currentToken) {
 	if (currentToken == "|") {
 		return true;
@@ -295,17 +303,7 @@ bool LexicalAnalyzer::isOr(string currentToken) {
 	}
 }
 
-//returns true if argument is a TRUE keyword
-bool LexicalAnalyzer::isElse(string currentToken) {
-	if (currentToken == "else") {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
 
-//returns true if argument is a NOT symbol
 bool LexicalAnalyzer::isNot(string currentToken) {
 	if (currentToken == "!") {
 		return true;
@@ -315,9 +313,8 @@ bool LexicalAnalyzer::isNot(string currentToken) {
 	}
 }
 
-//returns true if argument is a RETURN keyword
-bool LexicalAnalyzer::isReturn(string currentToken) {
-	if (currentToken == "return") {
+bool LexicalAnalyzer::isInt(string currentToken) {
+	if (currentToken == "int") {
 		return true;
 	}
 	else {
@@ -325,9 +322,9 @@ bool LexicalAnalyzer::isReturn(string currentToken) {
 	}
 }
 
-//returns true if argument is a VAR keyword
-bool LexicalAnalyzer::isVar(string currentToken) {
-	if (currentToken == "var") {
+
+bool LexicalAnalyzer::isPrint(string currentToken) {
+	if (currentToken == "print") {
 		return true;
 	}
 	else {
@@ -335,9 +332,19 @@ bool LexicalAnalyzer::isVar(string currentToken) {
 	}
 }
 
-//returns true if argument is a WHILE keyword
-bool LexicalAnalyzer::isWhile(string currentToken) {
-	if (currentToken == "while") {
+
+bool LexicalAnalyzer::isChars(string currentToken) {
+	if (currentToken == "chars") {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
+bool LexicalAnalyzer::isFloat(string currentToken) {
+	if (currentToken == "float") {
 		return true;
 	}
 	else {
@@ -350,6 +357,7 @@ bool LexicalAnalyzer::isID(string currentToken) {
 	if (isalpha(currentToken[0]) && currentToken != "if" && currentToken != "function" &&
 		currentToken != "else" && currentToken != "return" && currentToken != "var" &&
 		currentToken != "while") {
+		
 		return true;
 	}
 	else {
@@ -357,7 +365,7 @@ bool LexicalAnalyzer::isID(string currentToken) {
 	}
 }
 
-//returns true if argument is a left parentesis
+
 bool LexicalAnalyzer::isParenL(string currentToken) {
 	if (currentToken == "(") {
 		return true;
@@ -367,7 +375,7 @@ bool LexicalAnalyzer::isParenL(string currentToken) {
 	}
 }
 
-//returns true if argument is a right parentesis
+
 bool LexicalAnalyzer::isParenR(string currentToken) {
 	if (currentToken == ")") {
 		return true;
@@ -377,7 +385,7 @@ bool LexicalAnalyzer::isParenR(string currentToken) {
 	}
 }
 
-//returns true if argument is a left curly brace
+
 bool LexicalAnalyzer::isCurlL(string currentToken) {
 	if (currentToken == "{") {
 		return true;
@@ -387,7 +395,7 @@ bool LexicalAnalyzer::isCurlL(string currentToken) {
 	}
 }
 
-//returns true if argument is a right curly brace
+
 bool LexicalAnalyzer::isCurlR(string currentToken) {
 	if (currentToken == "}") {
 		return true;
@@ -397,7 +405,7 @@ bool LexicalAnalyzer::isCurlR(string currentToken) {
 	}
 }
 
-//returns true if argument is a SEMICOLON
+
 bool LexicalAnalyzer::isSemicolon(string currentToken) {
 	if (currentToken == ";") {
 		return true;
@@ -407,7 +415,7 @@ bool LexicalAnalyzer::isSemicolon(string currentToken) {
 	}
 }
 
-//returns true if argument is a ADDOP (+ or -)
+
 bool LexicalAnalyzer::isAddOp(string currentToken) {
 	if (currentToken == "+" || currentToken == "-") {
 		return true;
@@ -417,7 +425,7 @@ bool LexicalAnalyzer::isAddOp(string currentToken) {
 	}
 }
 
-//returns true if argument is a MULOP (/ or *)
+
 bool LexicalAnalyzer::isMulOp(string currentToken) {
 	if (currentToken == "/" || currentToken == "*") {
 		return true;
@@ -427,7 +435,7 @@ bool LexicalAnalyzer::isMulOp(string currentToken) {
 	}
 }
 
-//returns true if argument is a comma
+
 bool LexicalAnalyzer::isComma(string currentToken) {
 	if (currentToken == ",") {
 		return true;
@@ -437,7 +445,7 @@ bool LexicalAnalyzer::isComma(string currentToken) {
 	}
 }
 
-//returns true if argument is a AND symbol
+
 bool LexicalAnalyzer::isAnd(string currentToken) {
 	if (currentToken == "&") {
 		return true;
@@ -447,9 +455,9 @@ bool LexicalAnalyzer::isAnd(string currentToken) {
 	}
 }
 
-//returns true if argument is a ASSIGNMENT operator
+
 bool LexicalAnalyzer::isAssignmentOperator(string currentToken) {
-	if (currentToken == "<-") {
+	if (currentToken == "<-" || currentToken == "->" ) {
 		return true;
 	}
 	else {
@@ -457,7 +465,7 @@ bool LexicalAnalyzer::isAssignmentOperator(string currentToken) {
 	}
 }
 
-//returns true if a argument is a COMMENT symbol (#)
+
 bool LexicalAnalyzer::isComment(char ch) {
 	if (ch == '#') {
 		return true;
@@ -467,109 +475,188 @@ bool LexicalAnalyzer::isComment(char ch) {
 	}
 }
 
-//figures out token type of argument
+
+string EraseSpace(string& s)
+{
+	const char ch = ' ';
+	s.erase(s.find_last_not_of(" ") + 1);
+	s.erase(0, s.find_first_not_of(" "));
+	return s;
+}
+
+
 void LexicalAnalyzer::analyzeToken(vector<char> token) {
+
 	string currentToken;
+	int FLAG = 1;	
 	for (int x = 0; x < token.size(); x++) {
-		currentToken += token[x];
+		if (token[x]!='\t')
+		{
+			currentToken += token[x];
+		}
 	}
 
-	//checks if token is a function keyword
-	if (isFunction(currentToken)) {
-		cout << "TOKEN:FUNCTION          " << currentToken << endl;
+	vector<string>::iterator it = find(lexical_vector.begin(), lexical_vector.end(), currentToken);
+	if (it != lexical_vector.end()) {}
+	else
+	{
+		if (currentToken != "")
+		{
+			lexical_vector.push_back(currentToken);
+			FLAG = 0;
+		}
+	}
+
+	if (isMain(currentToken)) {
+		cout << "TOKEN:MAIN          " <<  currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("---");
+		}
 	}
 
 	else if (isAssignmentOperator(currentToken)) {
-		cout << "TOKEN:ASSIGNOP          " << currentToken << endl;
+		cout << "TOKEN:ASSIGNOP          " <<   currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("ASSIGNOP");
+		}
 	}
 
-	//checks if token is a if keyword
 	else if (isIf(currentToken)) {
 		cout << "TOKEN:IF                " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("IF");
+		}
 	}
 
-	//checks if token is a else keyword
-	else if (isElse(currentToken)) {
-		cout << "TOKEN:ELSE              " << currentToken << endl;
+
+	else if (isInt(currentToken)) {
+		cout << "TOKEN:INT            " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("---");
+		}
 	}
 
-	//checks if token is a return keyword
-	else if (isReturn(currentToken)) {
-		cout << "TOKEN:RETURN            " << currentToken << endl;
-	}
-
-	//checks if token is a not symbol
 	else if (isNot(currentToken)) {
 		cout << "TOKEN:NOT               " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("NOT");
+		}
 	}
 
-	//checks if token is a or keyword
 	else if (isOr(currentToken)) {
 		cout << "TOKEN:OR                " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("OR");
+		}
 	}
 
-	//checks if token is a VAR keyword
-	else if (isVar(currentToken)) {
-		cout << "TOKEN:VAR               " << currentToken << endl;
+	else if (isPrint(currentToken)) {
+		cout << "TOKEN:PRINT               " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("---");
+		}
 	}
 
-	//checks if token is a WHILE keyword
-	else if (isWhile(currentToken)) {
-		cout << "TOKEN:WHILE             " << currentToken << endl;
+	else if (isChars(currentToken)) {
+		cout << "TOKEN:CHARS             " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("---");
+		}
 	}
 
-	//checks if token is a semicolon
 	else if (isSemicolon(currentToken)) {
 		cout << "TOKEN:SEMICOLON         " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("SEMICOLON");
+		}
 	}
 
-	//checks if token is a left parentesis
 	else if (isParenL(currentToken)) {
 		cout << "TOKEN:PARENL            " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("PARENL");
+		}
 	}
 
 	else if (isParenR(currentToken)) {
 		cout << "TOKEN:PARENR            " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("PARENR");
+		}
 	}
 
-	//checks if token is a comma
 	else if (isComma(currentToken)) {
 		cout << "TOKEN:COMMA             " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("COMMA");
+		}
 	}
 
-	//checks if token is left curly
 	else if (isCurlL(currentToken)) {
 		cout << "TOKEN:CURLL             " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("CURLL");
+		}
 	}
 
-	//checks if token is right curly
 	else if (isCurlR(currentToken)) {
 		cout << "TOKEN:CURLR             " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("CURLR");
+		}
 	}
 
-	//checks if token is a ADDOP (+ or -)
 	else if (isAddOp(currentToken)) {
 		cout << "TOKEN:ADDOP             " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("ADDOP");
+		}
 	}
 
-	//checks if token is a MULLOP (/ or *)
 	else if (isMulOp(currentToken)) {
 		cout << "TOKEN:MULOP             " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("MULOP");
+		}
 	}
 
-	//checks if token is an AND
 	else if (isAnd(currentToken)) {
 		cout << "TOKEN:AND               " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("AND");
+		}
 	}
 
-	//checks if token is a RELOP
 	else if (isRelopString(currentToken)) {
 		cout << "TOKEN:RELOP             " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back("RELOP");
+		}
 	}
 
-	//checks if token is a ID
 	else if (isID(currentToken)) {
 		cout << "TOKEN:ID                " << currentToken << endl;
+		if (FLAG == 0)
+		{
+			zhonglei.push_back(currentToken);
+		}
 	}
-
 }

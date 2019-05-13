@@ -24,17 +24,18 @@ int Base::get_nindex(char target)
 	}
 	return -1;
 }
+//得到first集合
 void Base::get_first(char target)
 {
 	int tag = 0;
 	int flag = 0;
-	for (int i = 0; i<T; i++)
+	for (int i = 0; i < T; i++)
 	{
 		if (analy_str[i].left == target)//匹配产生式左部
 		{
 			if (!isNotSymbol(analy_str[i].right[0]))//对于终结符，直接加入first
 			{
-				first_set[get_index(target)].insert(analy_str[i].right[0]);
+				first_set[get_index(target)].insert(analy_str[i].right[0]);//插入
 			}
 			else
 			{
@@ -47,10 +48,10 @@ void Base::get_first(char target)
 					}
 					get_first(analy_str[i].right[j]);//递归
 					//	cout<<"curr :"<<analy_str[i].right[j];
-					set<char>::iterator it; 
+					set<char>::iterator it; //迭代器(智能指针)初始化
 					for (it = first_set[get_index(analy_str[i].right[j])].begin(); it != first_set[get_index(analy_str[i].right[j])].end(); it++)
 					{
-						if (*it == '$')
+						if (*it == '$')//判断是否为空
 							flag = 1;
 						else
 							first_set[get_index(target)].insert(*it);//将FIRST(Y)中的非$就加入FIRST(X)
@@ -113,7 +114,6 @@ void Base::get_follow(char target)
 				}
 			}
 		}
-
 		else if (index != -1 && index == len - 1 && target != analy_str[i].left)
 		{
 			get_follow(analy_str[i].left);
@@ -122,32 +122,33 @@ void Base::get_follow(char target)
 			for (it = follow_set[get_index(tmp)].begin(); it != follow_set[get_index(tmp)].end(); it++)
 				follow_set[get_index(target)].insert(*it);
 		}
-
-	}
+	} 
 }
+//起始函数 负责产生式的导入预处理
 void Base::inputAndSolve()
 {
 	string s;
-	cout << "输入的产生式的个数：" << endl;
-	cin >> T;
-	for (int index = 0; index<T; index++)
+	/*cout << "输入的产生式的个数：" << endl;*/
+	T=8;
+	string yufa[8] = { "E->TK","K-> + TK","K->$","T->FM","M->*FM","M->$","F->i","F->(E)"};
+	for (int index = 0; index < T; index++)
 	{
-		cin >> s;
+		s = yufa[index];
 		string temp = "";
-		for (int i = 0; i<s.length(); i++)
+		//字符串处理 当读到空停止
+		for (int i = 0; i< s.length(); i++)
 		{
 			if (s[i] != ' ')
-				temp += s[i];
+				temp += s[i];//字符串拼接
 		}
-		analy_str[index].left = temp[0];
-		for (int i = 3; i<temp.length(); i++)
+		analy_str[index].left = temp[0];//构造树
+		for (int i = 3; i<temp.length(); i++)//处理产生式右侧的文本 警告:无法处理形似BB->
 			analy_str[index].right += temp[i];
-
-
 		for (int i = 0; i<temp.length(); i++)
 		{
 			if (temp[i] != '-' && temp[i] != '>')
 			{
+				//检查是否为非终结符
 				if (isNotSymbol(temp[i]))
 				{
 					int flag = 0;
@@ -160,8 +161,7 @@ void Base::inputAndSolve()
 						}
 					}
 					if (!flag)
-						non_colt.push_back(temp[i]);
-
+						non_colt.push_back(temp[i]);//将临时变量推进非终结符容器尾部
 				}
 				else
 				{
@@ -175,13 +175,13 @@ void Base::inputAndSolve()
 						}
 					}
 					if (!flag)
-						ter_colt.push_back(temp[i]);
+						ter_colt.push_back(temp[i]);//将临时变量推进终结符容器尾部
 				}
 			}
 		}
 
 	}
-	ter_colt.push_back('#');
+	ter_colt.push_back('#');//将'#'推入终结符容器中
 	//first
 	for (int i = 0; i<non_colt.size(); i++)
 	{

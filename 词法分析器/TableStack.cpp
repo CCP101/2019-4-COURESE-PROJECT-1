@@ -21,6 +21,7 @@ void TableStack::get_table()
 		else
 		{
 			set<char>::iterator ti;
+			//智能指针寻找set库的起始位与结束位，防止内存溢出
 			for (ti = first_set[get_index(tmp)].begin(); ti != first_set[get_index(tmp)].end(); ti++)
 			{
 				tableMap[get_index(analy_str[i].left)][get_nindex(*ti)] = i;
@@ -51,6 +52,7 @@ void TableStack::analyExp(string s)
 		string outs = "";
 		for (int i = 0; i<to_any.size(); i++)
 			outs += to_any[i];
+		//格式控制
 		cout << setw(15) << outs;
 
 		//cout<<"剩余输入串：";
@@ -125,7 +127,7 @@ void TableStack::getAns()
 	//栈匹配
 	string ss;
 	cout << "请输入符号串：" << endl;
-	cin >> ss;
+	ss = "i+i*i#";
 	cout << setw(15) << "分析栈" << setw(15) << "剩余输入串" << setw(15) << "推导式" << endl;
 	analyExp(ss);
 
